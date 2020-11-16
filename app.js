@@ -31,6 +31,15 @@ class CircularSlider {
             svg.setAttribute('width', this.sliderWidthHeight);
             svgContainer.appendChild(svg);
             this.container.appendChild(svgContainer);
+
+            // event listeners
+            svgContainer.addEventListener('mousedown', this.startEvent.bind(this), false); // bubbling / capturing
+            svgContainer.addEventListener('touchstart', this.startEvent.bind(this), false);
+            svgContainer.addEventListener('mouseup', this.endEvent.bind(this), false);
+            svgContainer.addEventListener('touchend', this.endEvent.bind(this), false);
+            svgContainer.addEventListener('mousemove', this.moveEvent.bind(this), false);
+            svgContainer.addEventListener('touchmove', this.moveEvent.bind(this), false);
+            
         }
 
         // SVG slider group
@@ -40,27 +49,27 @@ class CircularSlider {
         sliderGroup.setAttribute('radius', this.sliders[this.sliders.length - 1].radius);
         svg.appendChild(sliderGroup);
 
-        //calculations
+        // calculations
         const circumference = this.sliders[this.sliders.length - 1].radius * 2 * Math.PI; 
         const numOfParticles = Math.floor((circumference / this.circleParticle.length) * 0.8);
         const totalSpacing = circumference - numOfParticles * this.circleParticle.length;
         let circleParticleSpacing = totalSpacing / numOfParticles;
 
-        //draw
+        // draw
         this.drawSliderPath(sliderGroup, circleParticleSpacing, 360, true); //background
-        this.drawSliderPath(sliderGroup, circleParticleSpacing, 0, false); //slider
+        this.drawSliderPath(sliderGroup, circleParticleSpacing, 60, false); //slider
     }
 
     drawSliderPath(sliderGroup, circleParticleSpacing, angle, background) {
-        //draw slider path
+        // draw slider path
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', this.pathAttribute(this.sliders[this.sliders.length - 1].radius, angle));
         path.style.stroke =  background === true ? this.circleParticle.color : this.sliders[this.sliders.length - 1].color;
         path.style.strokeWidth = this.circleParticle.width;
         path.style.fill = 'none';
-        path.setAttribute('stroke-dasharray', this.circleParticle.length + ' ' + circleParticleSpacing);
+        if(background) path.setAttribute('stroke-dasharray', this.circleParticle.length + ' ' + circleParticleSpacing);
         sliderGroup.appendChild(path);
-        if(!background) { //draw handler
+        if(!background) { // draw handler
             const center = this.polarToCartesian(this.sliders[this.sliders.length - 1].radius, angle)
             const handler = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             handler.setAttribute('cx', center.x);
@@ -91,5 +100,17 @@ class CircularSlider {
         const y = this.sliderWidthHeight/2 + (radius * Math.sin(angleRad));
         return {x, y};
     }
+
+    startEvent(event) {
+        
+    }
+
+    endEvent(event) {
+        
+    }
+
+    moveEvent(event) {
+        
+    }    
 
 }
