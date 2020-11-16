@@ -4,7 +4,22 @@
     <meta charset="utf-8">
     <title>Circular Slider</title>
     <link rel="stylesheet" type="text/css" href="app.css">
+    <script type="text/javascript" src="app.js"></script>
 </head>
 <body>
+    <div id="slider"></div>
+
+    <script>
+        const slider1 = new Slider({
+            container: "slider",
+            color: "#800080",
+            min: 0,
+            max: 1000,
+            step: 1,
+            radius: 200,
+            title: "Transportation"
+        });
+        slider1.generate();
+    </script>
 </body>
 </html>
