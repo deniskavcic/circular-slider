@@ -37,7 +37,7 @@ class CircularSlider {
             legend.style.float = "left";  
             this.container.appendChild(legend);
 
-            // container and SVG
+            //container and SVG
             const svgContainer = document.createElement('div');
             svgContainer.setAttribute('id', this.svgContainerId);
             svgContainer.style.height = this.containerWidthHeight + "px";
@@ -50,7 +50,7 @@ class CircularSlider {
             svgContainer.appendChild(svg);
             this.container.appendChild(svgContainer);
 
-            // event listeners
+            //event listeners
             svgContainer.addEventListener('mousedown', this.startEvent.bind(this), false); // bubbling / capturing
             svgContainer.addEventListener('touchstart', this.startEvent.bind(this), false);
             svgContainer.addEventListener('mouseup', this.endEvent.bind(this), false);
@@ -61,11 +61,10 @@ class CircularSlider {
 
         //legend row
         const row = document.createElement("div");
-        //row.setAttribute('id', this.legendId + "-" + CircularSlider.prototype.shared)
         row.innerHTML = "<span style='font-size:35px; display:inline-block; width:120px'><b>$<span id='" + this.legendId + "-" + CircularSlider.prototype.shared + "'>" + this.options.min + "<span></b></span> <span style='width:25px; height:15px; display:inline-block; background-color:" + this.options.color + "'></span> <span style='font-size:20px'>&nbsp;&nbsp;" + this.options.title + "</span>";
         legend.appendChild(row);
 
-        // SVG slider group
+        //SVG group
         const sliderGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         sliderGroup.setAttribute('index', this.legendId + "-" + CircularSlider.prototype.shared);
         sliderGroup.setAttribute('min', this.options.min);
@@ -114,9 +113,7 @@ class CircularSlider {
         let start = this.polarToCartesian(radius, angle);
         let end = this.polarToCartesian(radius, 0);
         let path = ['M', start.x, start.y, 'A', radius, radius, 0, arc, 0, end.x, end.y].join(' ');
-
         if (angle === 359) path = path + ' Z';
-
         return path;
     }
 
