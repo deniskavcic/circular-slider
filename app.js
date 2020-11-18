@@ -2,12 +2,11 @@ class CircularSlider {
 
     constructor(options) {
         this.container = document.getElementById(options.container);
-        this.svgId = "svg-circular-slider";
-        this.svgContainerId = "svg-circular-slider-container";
-        this.sliderId = "slider-index-";
-        this.handlerId = "slider-handler-index-";
         this.options = options;
-
+        this.svgId = "svg-circular-slider-" + this.options.container;
+        this.svgContainerId = "svg-circular-slider-container-" + this.options.container;
+        this.legendId = "circular-slider-legend-id-" + this.options.container;
+    
         this.containerWidthHeight = 600;   
         this.circleParticle = {
             length: 15,
@@ -24,10 +23,23 @@ class CircularSlider {
 
     generate() {
         let svg = document.getElementById(this.svgId);
+        let legend = document.getElementById(this.legendId);
         if(!svg) {
+            //create legend
+            legend = document.createElement('div');
+            legend.setAttribute('id', this.legendId);
+            legend.style.height = this.containerWidthHeight + "px";
+            legend.style.width = (this.containerWidthHeight/2) + "px";  
+            legend.style.paddingLeft = "20px";  
+            legend.style.paddingTop = "100px";  
+            legend.style.float = "left";  
+
             // container and SVG
             const svgContainer = document.createElement('div');
             svgContainer.setAttribute('id', this.svgContainerId);
+            svgContainer.style.height = this.containerWidthHeight + "px";
+            svgContainer.style.width = this.containerWidthHeight + "px";
+            svgContainer.style.float = "left";  
             svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('id', this.svgId);
             svg.setAttribute('height', this.containerWidthHeight);
@@ -42,8 +54,13 @@ class CircularSlider {
             svgContainer.addEventListener('touchend', this.endEvent.bind(this), false);
             svgContainer.addEventListener('mousemove', this.moveEvent.bind(this), false);
             svgContainer.addEventListener('touchmove', this.moveEvent.bind(this), false);
-            
         }
+
+        //legend row
+        const row = document.createElement("div");
+        row.innerHTML = "$ " + this.options.min + " " + this.options.title;
+        legend.appendChild(row);
+        this.container.appendChild(legend);
 
         // SVG slider group
         const sliderGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
