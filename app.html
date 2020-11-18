@@ -9,14 +9,13 @@
 <body>
     
     <div id="slider"></div>
-    <div id="slider1"></div>
 
     <script>
         const slider1 = new CircularSlider({
             container: "slider",
             color: "#80008081",
             min: 0,
-            max: 1000,
+            max: 100,
             step: 1,
             radius: 260,
             title: "Transportation"
@@ -27,7 +26,7 @@
             container: "slider",
             color: "#2e54ff77",
             min: 0,
-            max: 1000,
+            max: 500,
             step: 1,
             radius: 220,
             title: "Food"
@@ -37,8 +36,8 @@
         const slider3 = new CircularSlider({
             container: "slider",
             color: "#3fff2e77",
-            min: 0,
-            max: 1000,
+            min: 100,
+            max: 330,
             step: 1,
             radius: 180,
             title: "Insurance"
@@ -46,21 +45,21 @@
         slider3.generate();
 
         const slider4 = new CircularSlider({
-            container: "slider1",
+            container: "slider",
             color: "#fc8f0077",
-            min: 0,
-            max: 1000,
-            step: 1,
+            min: 700,
+            max: 1100,
+            step: 10,
             radius: 140,
             title: "Enterteinment"
         });
         slider4.generate();
 
         const slider5 = new CircularSlider({
-            container: "slider1",
+            container: "slider",
             color: "#ee101077",
-            min: 0,
-            max: 1000,
+            min: 500,
+            max: 999,
             step: 1,
             radius: 100,
             title: "Health care"

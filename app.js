@@ -6,6 +6,8 @@ class CircularSlider {
         this.svgId = "svg-circular-slider-" + this.options.container;
         this.svgContainerId = "svg-circular-slider-container-" + this.options.container;
         this.legendId = "circular-slider-legend-id-" + this.options.container;
+
+        CircularSlider.prototype.shared++;
     
         this.containerWidthHeight = 600;   
         this.circleParticle = {
@@ -30,9 +32,10 @@ class CircularSlider {
             legend.setAttribute('id', this.legendId);
             legend.style.height = this.containerWidthHeight + "px";
             legend.style.width = (this.containerWidthHeight/2) + "px";  
-            legend.style.paddingLeft = "20px";  
+            legend.style.paddingLeft = "10px";  
             legend.style.paddingTop = "100px";  
             legend.style.float = "left";  
+            this.container.appendChild(legend);
 
             // container and SVG
             const svgContainer = document.createElement('div');
@@ -58,24 +61,28 @@ class CircularSlider {
 
         //legend row
         const row = document.createElement("div");
-        row.innerHTML = "$ " + this.options.min + " " + this.options.title;
+        //row.setAttribute('id', this.legendId + "-" + CircularSlider.prototype.shared)
+        row.innerHTML = "<span style='font-size:35px; display:inline-block; width:120px'><b>$<span id='" + this.legendId + "-" + CircularSlider.prototype.shared + "'>" + this.options.min + "<span></b></span> <span style='width:25px; height:15px; display:inline-block; background-color:" + this.options.color + "'></span> <span style='font-size:20px'>&nbsp;&nbsp;" + this.options.title + "</span>";
         legend.appendChild(row);
-        this.container.appendChild(legend);
 
         // SVG slider group
         const sliderGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        sliderGroup.setAttribute('index', this.legendId + "-" + CircularSlider.prototype.shared);
+        sliderGroup.setAttribute('min', this.options.min);
+        sliderGroup.setAttribute('max', this.options.max);
+        sliderGroup.setAttribute('step', this.options.step);
         sliderGroup.setAttribute('transform', 'rotate(-90,' + this.containerWidthHeight/2 + ',' + this.containerWidthHeight/2 + ')');
         svg.appendChild(sliderGroup);
 
         // calculations
         const circumference = this.options.radius * 2 * Math.PI; 
-        const numOfParticles = Math.floor((circumference / this.circleParticle.length) * 0.8);
+        const numOfParticles = Math.floor((circumference / this.circleParticle.length) * 0.75);
         const totalSpacing = circumference - numOfParticles * this.circleParticle.length;
         let circleParticleSpacing = totalSpacing / numOfParticles;
 
         // draw
         this.drawSliderPath(sliderGroup, circleParticleSpacing, 360, true); //background
-        this.drawSliderPath(sliderGroup, circleParticleSpacing, 60, false); //slider
+        this.drawSliderPath(sliderGroup, circleParticleSpacing, 0, false); //slider
     }
 
     drawSliderPath(sliderGroup, circleParticleSpacing, angle, background) {
@@ -127,7 +134,7 @@ class CircularSlider {
 
         if(event.path[0].tagName == "circle" || event.path[0].tagName == "path") {
             this.activeSlider = event.path[1];
-            this.redrawActiveSliderPath(relativeCords);
+            this.redraw(relativeCords);
         }
     }
 
@@ -141,7 +148,7 @@ class CircularSlider {
         event.preventDefault();
         const svgContainer = document.getElementById(this.svgContainerId).getBoundingClientRect();
         const relativeCords = this.calculateRelativeCords(event, svgContainer); 
-        this.redrawActiveSliderPath(relativeCords);
+        this.redraw(relativeCords);
     }    
 
     calculateRelativeCords(event, svgContainer) { 
@@ -154,7 +161,7 @@ class CircularSlider {
         return { left, top }
     }
 
-    redrawActiveSliderPath(relativeCords) {
+    redraw(relativeCords) {
         const slider = this.activeSlider.getElementsByTagName('path')[1];
         //calculate new angle in degrees
         let newAngle = (Math.atan2((relativeCords.left - this.containerWidthHeight/2), (this.containerWidthHeight/2) - relativeCords.top)) * (180 / Math.PI);
@@ -168,5 +175,16 @@ class CircularSlider {
         const handler = this.activeSlider.getElementsByTagName('circle')[0];
         handler.setAttribute('cx', handlerCenter.x);
         handler.setAttribute('cy', handlerCenter.y);
+
+        //redraw legend
+        const min = this.activeSlider.getAttribute('min');
+        const max = this.activeSlider.getAttribute('max');
+        const step = this.activeSlider.getAttribute('step');
+        const newVal = ((newAngle * (max - min)) / 360) + parseInt(min);
+        const oldVal = parseInt(document.getElementById(this.activeSlider.getAttribute('index')).innerHTML);
+        if((newVal - oldVal) >= 0) document.getElementById(this.activeSlider.getAttribute('index')).innerHTML = (step * Math.round(Math.abs(newVal - oldVal) / step)) + oldVal;
+        else document.getElementById(this.activeSlider.getAttribute('index')).innerHTML = oldVal - (step * Math.round(Math.abs(newVal - oldVal) / step));
     }
 }
+
+CircularSlider.prototype.shared = 0;
