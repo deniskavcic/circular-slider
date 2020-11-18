@@ -6,7 +6,7 @@ class CircularSlider {
         this.svgContainerId = "svg-circular-slider-container";
         this.sliderId = "slider-index-";
         this.handlerId = "slider-handler-index-";
-        CircularSlider.shared.push(options);
+        this.options = options;
 
         this.containerWidthHeight = 600;   
         this.circleParticle = {
@@ -18,9 +18,8 @@ class CircularSlider {
             width: 2, 
             color: "white",
             strokeColor: "gray"
-        }        
-        this.mouseTouchDown = false;      
-        this.activeSliderIndex;              
+        }          
+        this.activeSlider = null; 
     }
 
     generate() {
@@ -52,7 +51,7 @@ class CircularSlider {
         svg.appendChild(sliderGroup);
 
         // calculations
-        const circumference = CircularSlider.shared[CircularSlider.shared.length - 1].radius * 2 * Math.PI; 
+        const circumference = this.options.radius * 2 * Math.PI; 
         const numOfParticles = Math.floor((circumference / this.circleParticle.length) * 0.8);
         const totalSpacing = circumference - numOfParticles * this.circleParticle.length;
         let circleParticleSpacing = totalSpacing / numOfParticles;
@@ -65,17 +64,16 @@ class CircularSlider {
     drawSliderPath(sliderGroup, circleParticleSpacing, angle, background) {
         // draw slider path
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', this.pathAttribute(CircularSlider.shared[CircularSlider.shared.length - 1].radius, angle));
-        path.style.stroke =  background === true ? this.circleParticle.color : CircularSlider.shared[CircularSlider.shared.length - 1].color;
+        path.setAttribute('d', this.pathAttribute(this.options.radius, angle));
+        path.style.stroke =  background === true ? this.circleParticle.color : this.options.color;
         path.style.strokeWidth = this.circleParticle.width;
         path.style.fill = 'none';
         if(background) path.setAttribute('stroke-dasharray', this.circleParticle.length + ' ' + circleParticleSpacing);
         sliderGroup.appendChild(path);
         if(!background) { // draw handler
-            path.setAttribute('id', (this.sliderId + (CircularSlider.shared.length - 1)));
-            const center = this.polarToCartesian(CircularSlider.shared[CircularSlider.shared.length - 1].radius, angle)
+            path.setAttribute('radius', this.options.radius);
+            const center = this.polarToCartesian(this.options.radius, angle)
             const handler = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            handler.setAttribute('id', this.handlerId + (CircularSlider.shared.length - 1));
             handler.setAttribute('cx', center.x);
             handler.setAttribute('cy', center.y);
             handler.setAttribute('r', this.circleParticle.width / 2);
@@ -106,48 +104,52 @@ class CircularSlider {
     }
 
     startEvent(event) {
-        if(this.mouseTouchDown) return
-        this.mouseTouchDown = true;
+        if(this.activeSlider) return
         const svgContainer = document.getElementById(this.svgContainerId).getBoundingClientRect();
         const relativeCords = this.calculateRelativeCords(event, svgContainer);  
-        const centerDistance = Math.hypot(relativeCords.left - (this.containerWidthHeight/2), relativeCords.top - (this.containerWidthHeight/2));
-        const allDistances = CircularSlider.shared.map(x => Math.abs(x.radius - centerDistance));
-        this.activeSliderIndex = allDistances.indexOf(Math.min(...allDistances));
-        
-        this.redrawActiveSliderPath(relativeCords);
+
+        if(event.path[0].tagName == "circle" || event.path[0].tagName == "path") {
+            this.activeSlider = event.path[1];
+            this.redrawActiveSliderPath(relativeCords);
+        }
     }
 
     endEvent(event) {
-        if(!this.mouseTouchDown) return
-        this.mouseTouchDown = false;
+        if(!this.activeSlider) return
+        this.activeSlider = null;
     }
 
     moveEvent(event) {
-        if(!this.mouseTouchDown) return
+        if(!this.activeSlider) return
+        event.preventDefault();
+        const svgContainer = document.getElementById(this.svgContainerId).getBoundingClientRect();
+        const relativeCords = this.calculateRelativeCords(event, svgContainer); 
+        this.redrawActiveSliderPath(relativeCords);
     }    
 
-    calculateRelativeCords(event, svgContainer) {   
-        const left = event.clientX - svgContainer.left;
-        const top = event.clientY - svgContainer.top;
+    calculateRelativeCords(event, svgContainer) { 
+        let x = event.clientX;
+        let y = event.clientY;
+        x = x === undefined ? event.touches[0].clientX : x;
+        y = y === undefined ? event.touches[0].clientY : y;
+        const left = x - svgContainer.left;
+        const top = y - svgContainer.top;
         return { left, top }
     }
 
     redrawActiveSliderPath(relativeCords) {
-        const activeSlider = document.getElementById(this.sliderId + this.activeSliderIndex);
-
+        const slider = this.activeSlider.getElementsByTagName('path')[1];
         //calculate new angle in degrees
         let newAngle = (Math.atan2((relativeCords.left - this.containerWidthHeight/2), (this.containerWidthHeight/2) - relativeCords.top)) * (180 / Math.PI);
         newAngle = newAngle >= 0 ? newAngle : newAngle + 360;
 
         //redraw active slider
-        activeSlider.setAttribute('d', this.pathAttribute(CircularSlider.shared[this.activeSliderIndex].radius, newAngle));
+        slider.setAttribute('d', this.pathAttribute(parseInt(slider.getAttribute('radius')), newAngle));
 
         //redraw handler
-        const handlerCenter = this.polarToCartesian(CircularSlider.shared[this.activeSliderIndex].radius, newAngle)
-        const handler = document.getElementById(this.handlerId + this.activeSliderIndex);
+        const handlerCenter = this.polarToCartesian(parseInt(slider.getAttribute('radius')), newAngle)
+        const handler = this.activeSlider.getElementsByTagName('circle')[0];
         handler.setAttribute('cx', handlerCenter.x);
         handler.setAttribute('cy', handlerCenter.y);
     }
 }
-
-CircularSlider.shared = [];
